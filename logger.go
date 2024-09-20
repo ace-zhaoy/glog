@@ -3,7 +3,6 @@ package glog
 import (
 	"context"
 	"fmt"
-	"github.com/ace-zhaoy/glog/cores"
 	"github.com/ace-zhaoy/glog/stacktrace"
 	"go.uber.org/zap/zapcore"
 	"time"
@@ -14,17 +13,17 @@ const (
 )
 
 type Logger struct {
-	core       cores.Core
+	core       Core
 	name       string
 	addCaller  bool
-	addStack   LevelEnabler
+	stackLevel LevelEnabler
 	callerSkip int
 
 	formatEnabled   bool
 	contextHandlers []ContextHandler
 }
 
-func NewLogger(core cores.Core, opts ...Option) *Logger {
+func NewLogger(core Core, opts ...Option) *Logger {
 	l := &Logger{
 		core: core,
 	}
@@ -116,8 +115,8 @@ func (l *Logger) check(lvl Level, msg string) (ce *zapcore.CheckedEntry) {
 	}
 
 	addStack := false
-	if l.addStack != nil {
-		addStack = l.addStack.Enabled(ce.Level)
+	if l.stackLevel != nil {
+		addStack = l.stackLevel.Enabled(ce.Level)
 	}
 	if !l.addCaller && !addStack {
 		return

@@ -1,7 +1,5 @@
 package glog
 
-import "github.com/ace-zhaoy/glog/cores"
-
 type Option interface {
 	apply(*Logger)
 }
@@ -12,7 +10,7 @@ func (f optionFunc) apply(log *Logger) {
 	f(log)
 }
 
-func WrapCore(f func(core cores.Core) cores.Core) Option {
+func WrapCore(f func(core Core) Core) Option {
 	return optionFunc(func(log *Logger) {
 		log.core = f(log.core)
 	})
@@ -36,11 +34,17 @@ func AddCaller() Option {
 
 func WithStack(lvl LevelEnabler) Option {
 	return optionFunc(func(l *Logger) {
-		l.addStack = lvl
+		l.stackLevel = lvl
 	})
 }
 
 func AddCallerSkip(skip int) Option {
+	return optionFunc(func(l *Logger) {
+		l.callerSkip += skip
+	})
+}
+
+func WithCallerSkip(skip int) Option {
 	return optionFunc(func(l *Logger) {
 		l.callerSkip = skip
 	})
@@ -50,6 +54,10 @@ func WithFormat(formatEnabled bool) Option {
 	return optionFunc(func(l *Logger) {
 		l.formatEnabled = formatEnabled
 	})
+}
+
+func WithFormatEnabled() Option {
+	return WithFormat(true)
 }
 
 func WithContextHandlers(handlers ...ContextHandler) Option {

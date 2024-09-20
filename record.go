@@ -28,7 +28,7 @@ type ContextHandler func(ctx context.Context, record *Record)
 // BuildContextHandler builds a ContextHandler from key and alias.
 func BuildContextHandler(key string, alias ...string) ContextHandler {
 	fieldName := key
-	if len(alias) > 0 {
+	if len(alias) > 0 && alias[0] != "" {
 		fieldName = alias[0]
 	}
 	return func(ctx context.Context, record *Record) {

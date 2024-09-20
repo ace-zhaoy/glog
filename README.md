@@ -4,5 +4,5 @@
 ## 功能特性
 - 支持从 context.Context 中提取字段值记录到日志
 - API 友好
-- 支持 message 格式化
+- 支持 printf 风格
 - 基于 zapcore.Core
