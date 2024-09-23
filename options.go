@@ -71,3 +71,9 @@ func AddContextHandlers(handlers ...ContextHandler) Option {
 		l.contextHandlers = append(l.contextHandlers, handlers...)
 	})
 }
+
+func WithFields(fields ...Field) Option {
+	return optionFunc(func(l *Logger) {
+		l.core = l.core.With(fields)
+	})
+}

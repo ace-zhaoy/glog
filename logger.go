@@ -110,6 +110,10 @@ func (l *Logger) WithContext(ctx context.Context) *Logger {
 	return log
 }
 
+func (l *Logger) Enabled(lvl Level) bool {
+	return l.core.Enabled(lvl)
+}
+
 func (l *Logger) check(lvl Level, msg string) (ce *zapcore.CheckedEntry) {
 	ent := zapcore.Entry{
 		LoggerName: l.name,
