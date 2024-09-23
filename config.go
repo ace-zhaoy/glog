@@ -3,6 +3,7 @@ package glog
 import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"sort"
 	"time"
 )
 
@@ -43,17 +44,29 @@ func (c *Config) buildOptions() []Option {
 	}
 
 	if len(c.ContextFields) > 0 {
+		keys := make([]string, 0, len(c.ContextFields))
+		for k := range c.ContextFields {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
 		contextHandlers := make([]ContextHandler, 0, len(c.ContextFields))
-		for k, v := range c.ContextFields {
-			contextHandlers = append(contextHandlers, BuildContextHandler(k, v))
+		for _, k := range keys {
+			contextHandlers = append(contextHandlers, BuildContextHandler(k, c.ContextFields[k]))
 		}
 		opts = append(opts, WithContextHandlers(contextHandlers...))
 	}
 
 	if len(c.InitialFields) > 0 {
-		fds := make([]Field, 0, len(c.InitialFields)*2)
-		for k, v := range c.InitialFields {
-			fds = append(fds, Any(k, v))
+		keys := make([]string, 0, len(c.InitialFields))
+		for k := range c.InitialFields {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		fds := make([]Field, 0, len(c.InitialFields))
+		for _, k := range keys {
+			fds = append(fds, Any(k, c.InitialFields[k]))
 		}
 
 		opts = append(opts, WrapCore(func(core Core) Core {

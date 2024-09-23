@@ -29,6 +29,14 @@ func init() {
 	SetLogger(l)
 }
 
+func WithFormatEnable() *glog.Logger {
+	return Logger().WithFormatEnable()
+}
+
+func WithFormatDisable() *glog.Logger {
+	return Logger().WithFormatDisable()
+}
+
 func LogContext(ctx context.Context, lvl glog.Level, msg string, args ...any) {
 	Logger().LogContext(ctx, lvl, msg, args...)
 }

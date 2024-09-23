@@ -86,6 +86,14 @@ func (l *Logger) WithFormat(formatEnabled bool) *Logger {
 	return log
 }
 
+func (l *Logger) WithFormatEnable() *Logger {
+	return l.WithFormat(true)
+}
+
+func (l *Logger) WithFormatDisable() *Logger {
+	return l.WithFormat(false)
+}
+
 func (l *Logger) WithContext(ctx context.Context) *Logger {
 	if ctx == nil || len(l.contextHandlers) == 0 {
 		return l
