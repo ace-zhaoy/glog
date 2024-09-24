@@ -1,6 +1,7 @@
 package glog
 
 import (
+	"github.com/ace-zhaoy/glog/cores"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"sort"
@@ -12,6 +13,7 @@ type SamplingConfig = zap.SamplingConfig
 type Config struct {
 	Name          string            `json:"name" yaml:"name"`
 	Level         Level             `json:"level" yaml:"level"`
+	LazyDisabled  bool              `json:"lazyDisabled" yaml:"lazyDisabled"`
 	AddCaller     bool              `json:"addCaller" yaml:"addCaller"`
 	StackLevel    *Level            `json:"stackLevel" yaml:"stackLevel"`
 	CallerSkip    int               `json:"callerSkip" yaml:"callerSkip"`
@@ -27,6 +29,12 @@ func (c *Config) buildOptions() []Option {
 
 	if c.Name != "" {
 		opts = append(opts, WithName(c.Name))
+	}
+
+	if c.LazyDisabled {
+		opts = append(opts, WrapCore(func(core Core) Core {
+			return cores.NewLazyCore(core)
+		}))
 	}
 
 	if c.AddCaller {
