@@ -20,7 +20,6 @@ func SetLogger(l *glog.Logger) {
 func init() {
 	config := glog.NewDefaultConfig()
 	l, err := config.Build(
-		glog.AddCallerSkip(1),
 		glog.WithStack(glog.LevelError),
 	)
 	if err != nil {

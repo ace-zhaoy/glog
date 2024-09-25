@@ -109,10 +109,12 @@ func (c *Config) Build(opts ...Option) (*Logger, error) {
 	return NewLogger(core, c.buildOptions()...).WithOptions(opts...), nil
 }
 
-func NewDefaultConfig() Config {
-	return Config{
-		Level:     LevelDebug,
-		AddCaller: true,
+func NewDefaultConfig() *Config {
+	stackLevel := LevelError
+	return &Config{
+		Level:      LevelDebug,
+		AddCaller:  true,
+		StackLevel: &stackLevel,
 		Sampling: &SamplingConfig{
 			Initial:    100,
 			Thereafter: 100,
