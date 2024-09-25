@@ -12,6 +12,10 @@ const (
 	callerSkipOffset = 3
 )
 
+func NewDefault(opts ...Option) (*Logger, error) {
+	return NewDefaultConfig().Build(opts...)
+}
+
 type Logger struct {
 	core       Core
 	name       string
