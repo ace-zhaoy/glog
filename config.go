@@ -100,6 +100,7 @@ func (c *Config) buildOptions() []Option {
 
 	return opts
 }
+
 func (c *Config) Build(opts ...Option) (*Logger, error) {
 	core, err := c.Core.Build(c.Level)
 	if err != nil {

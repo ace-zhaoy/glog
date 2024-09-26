@@ -45,10 +45,10 @@ const (
 
 // argsToFields converts arguments to fields.
 func argsToFields(args []any) (fields []Field) {
+	fields = make([]Field, 0, len(args))
 	if len(args) == 0 {
 		return
 	}
-	fields = make([]Field, 0, len(args))
 	argsLen := len(args)
 	for i := 0; i < argsLen; i++ {
 		switch v := args[i].(type) {

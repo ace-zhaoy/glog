@@ -2,6 +2,7 @@ package glog
 
 import (
 	"fmt"
+	"github.com/ace-zhaoy/glog/stacktrace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"time"
@@ -178,11 +179,11 @@ func Timep(key string, val *time.Time) Field {
 }
 
 func Stack(key string) Field {
-	return zap.Stack(key)
+	return String(key, stacktrace.Take(1))
 }
 
 func StackSkip(key string, skip int) Field {
-	return zap.StackSkip(key, skip)
+	return String(key, stacktrace.Take(skip+1))
 }
 
 func Duration(key string, val time.Duration) Field {
