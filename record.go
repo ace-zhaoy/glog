@@ -26,6 +26,8 @@ func (r *Record) Fields() []Field {
 type ContextHandler func(ctx context.Context, record *Record)
 
 // BuildContextHandler builds a ContextHandler from key and alias.
+// key is the context key for the value.
+// alias is an optional alias for the field key.
 func BuildContextHandler(key string, alias ...string) ContextHandler {
 	fieldName := key
 	if len(alias) > 0 && alias[0] != "" {

@@ -7,19 +7,35 @@ import (
 	"testing"
 )
 
-type mockCore struct{}
+type mockCore struct {
+	fields []Field
+}
 
-func NewMockCore() Core                                                                { return mockCore{} }
-func (mockCore) Enabled(Level) bool                                                    { return false }
-func (m mockCore) With(_ []Field) Core                                                 { return m }
-func (mockCore) Check(_ zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry { return ce }
-func (mockCore) Write(zapcore.Entry, []Field) error                                    { return nil }
-func (mockCore) Sync() error                                                           { return nil }
+func (m *mockCore) With(fields []Field) Core {
+	m.fields = fields
+	return m
+}
+
+func (m *mockCore) Enabled(lvl Level) bool {
+	return true
+}
+
+func (m *mockCore) Check(ent zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
+	return &zapcore.CheckedEntry{}
+}
+
+func (m *mockCore) Sync() error {
+	return nil
+}
+
+func (m *mockCore) Write(_ zapcore.Entry, _ []Field) error {
+	return nil
+}
 
 func TestWrapCore(t *testing.T) {
 	logger := &Logger{}
 	option := WrapCore(func(core Core) Core {
-		return mockCore{}
+		return &mockCore{}
 	})
 
 	option.apply(logger)
@@ -112,7 +128,7 @@ func TestAddContextHandlers(t *testing.T) {
 }
 
 func TestWithFields(t *testing.T) {
-	logger := &Logger{core: mockCore{}}
+	logger := &Logger{core: &mockCore{}}
 	field := zapcore.Field{Key: "key", String: "value"}
 	option := WithFields(field)
 
