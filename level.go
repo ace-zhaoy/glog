@@ -1,6 +1,7 @@
 package glog
 
 import (
+	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -14,3 +15,5 @@ const (
 )
 
 type LevelEnabler = zapcore.LevelEnabler
+
+type LevelEnablerFunc = zap.LevelEnablerFunc

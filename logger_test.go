@@ -195,7 +195,7 @@ func TestLogger_WithContext(t *testing.T) {
 }
 
 func TestLogger_Enabled(t *testing.T) {
-	core := &mockCore{}
+	core := &mockCore{enabled: true}
 	logger := NewLogger(core)
 
 	assert.True(t, logger.Enabled(LevelInfo), "Expected logger to be enabled")
@@ -259,6 +259,34 @@ func Test_countPercent(t *testing.T) {
 			},
 			want: 0,
 		},
+		{
+			name: "Empty string",
+			args: args{
+				s: "",
+			},
+			want: 0,
+		},
+		{
+			name: "Only percent signs",
+			args: args{
+				s: "%%%%",
+			},
+			want: 0,
+		},
+		{
+			name: "Single percent sign",
+			args: args{
+				s: "%",
+			},
+			want: 1,
+		},
+		{
+			name: "Multiple percent signs",
+			args: args{
+				s: "%%%s%%%d",
+			},
+			want: 2,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -268,5 +296,87 @@ func Test_countPercent(t *testing.T) {
 }
 
 func TestLogger_check(t *testing.T) {
+	core := &mockCore{}
+	logger := NewLogger(core)
 
+	t.Run("check returns nil if core is not enabled", func(t *testing.T) {
+		core.enabled = false
+		ce := logger.check(LevelInfo, "test message")
+		assert.Nil(t, ce, "Expected check to return nil when core is not enabled")
+	})
+
+	t.Run("check returns CheckedEntry if core is enabled", func(t *testing.T) {
+		core.enabled = true
+		ce := logger.check(LevelInfo, "test message")
+		assert.NotNil(t, ce, "Expected check to return CheckedEntry when core is enabled")
+		assert.Equal(t, "test message", ce.Message, "Expected message to be set in CheckedEntry")
+	})
+
+	t.Run("check adds caller information if addCaller is true", func(t *testing.T) {
+		logger.addCaller = true
+		ce := logger.check(LevelInfo, "test message")
+		assert.NotNil(t, ce.Caller, "Expected caller information to be added")
+		assert.True(t, ce.Caller.Defined, "Expected caller to be defined")
+	})
+
+	t.Run("check adds stack trace if stackLevel is enabled", func(t *testing.T) {
+		logger.stackLevel = LevelEnablerFunc(func(lvl Level) bool {
+			return lvl == LevelInfo
+		})
+		ce := logger.check(LevelInfo, "test message")
+		assert.NotEmpty(t, ce.Stack, "Expected stack trace to be added")
+	})
+}
+
+func TestLogger_log(t *testing.T) {
+	core := &mockCore{}
+	logger := NewLogger(core, WithContextHandlers(BuildContextHandler("key")))
+
+	t.Run("log without context", func(t *testing.T) {
+		core.reset()
+		core.enabled = true
+		logger.log(nil, LevelInfo, "test message", String("key", "value"))
+		assert.Len(t, core.entries, 1, "Expected one log entry")
+		assert.Equal(t, "test message", core.entries[0].Message, "Expected message to be 'test message'")
+		assert.Contains(t, core.fields, String("key", "value"), "Expected fields to contain 'key: value'")
+	})
+
+	t.Run("log with context", func(t *testing.T) {
+		core.reset()
+		core.enabled = true
+		ctx := context.WithValue(context.Background(), "key", "value")
+		logger.log(ctx, LevelInfo, "test message")
+		assert.Len(t, core.entries, 1, "Expected one log entry")
+		assert.Equal(t, "test message", core.entries[0].Message, "Expected message to be 'test message'")
+		assert.Contains(t, core.fields, String("key", "value"), "Expected fields to contain 'key: value'")
+	})
+
+	t.Run("log with formatted message", func(t *testing.T) {
+		core.reset()
+		core.enabled = true
+		logger = logger.WithFormatEnable()
+		logger.log(nil, LevelInfo, "Hello %s", "world")
+		assert.Len(t, core.entries, 1, "Expected one log entry")
+		assert.Equal(t, "Hello world", core.entries[0].Message, "Expected formatted message to be 'Hello world'")
+	})
+
+	t.Run("log with stack trace", func(t *testing.T) {
+		core.reset()
+		core.enabled = true
+		logger.stackLevel = LevelEnablerFunc(func(lvl Level) bool {
+			return lvl == LevelInfo
+		})
+		logger.log(nil, LevelInfo, "test message")
+		assert.Len(t, core.entries, 1, "Expected one log entry")
+		assert.NotEmpty(t, core.entries[0].Stack, "Expected stack trace to be added")
+	})
+
+	t.Run("log with caller information", func(t *testing.T) {
+		core.reset()
+		core.enabled = true
+		logger.addCaller = true
+		logger.log(nil, LevelInfo, "test message")
+		assert.Len(t, core.entries, 1, "Expected one log entry")
+		assert.True(t, core.entries[0].Caller.Defined, "Expected caller information to be added")
+	})
 }

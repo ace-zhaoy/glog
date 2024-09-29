@@ -8,28 +8,41 @@ import (
 )
 
 type mockCore struct {
-	fields []Field
-}
-
-func (m *mockCore) With(fields []Field) Core {
-	m.fields = fields
-	return m
+	enabled bool
+	entries []zapcore.Entry
+	fields  []Field
 }
 
 func (m *mockCore) Enabled(lvl Level) bool {
-	return true
+	return m.enabled
+}
+
+func (m *mockCore) With(fields []Field) Core {
+	m.fields = append(m.fields, fields...)
+	return m
 }
 
 func (m *mockCore) Check(ent zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
-	return &zapcore.CheckedEntry{}
+	if m.Enabled(ent.Level) {
+		return ce.AddCore(ent, m)
+	}
+	return nil
+}
+
+func (m *mockCore) Write(ent zapcore.Entry, fields []Field) error {
+	m.entries = append(m.entries, ent)
+	m.fields = append(m.fields, fields...)
+	return nil
 }
 
 func (m *mockCore) Sync() error {
 	return nil
 }
 
-func (m *mockCore) Write(_ zapcore.Entry, _ []Field) error {
-	return nil
+func (m *mockCore) reset() {
+	m.enabled = false
+	m.entries = nil
+	m.fields = nil
 }
 
 func TestWrapCore(t *testing.T) {
