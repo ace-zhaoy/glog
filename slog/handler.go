@@ -8,13 +8,10 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log/slog"
-	"slices"
 )
 
 type Handler struct {
 	l *glog.Logger
-
-	groups []string
 }
 
 var _ slog.Handler = (*Handler)(nil)
@@ -34,73 +31,42 @@ func (h *Handler) Handle(ctx context.Context, record slog.Record) error {
 	if !h.l.Enabled(lvl) {
 		return nil
 	}
-	attrs := make([]slog.Attr, 0, record.NumAttrs())
+
+	fields := make([]any, 0, record.NumAttrs())
 	record.Attrs(func(attr slog.Attr) bool {
-		attrs = append(attrs, attr)
+		fields = append(fields, attr2Field(attr))
 		return true
 	})
 
-	fields := h.toFields(attrs)
 	h.l.LogContext(ctx, lvl, record.Message, fields...)
 	return nil
 }
 
-func isEmptyGroup(attr slog.Attr) bool {
-	if attr.Value.Kind() != slog.KindGroup {
-		return false
-	}
-
-	return len(attr.Value.Group()) == 0
-}
-
-func (h *Handler) toFields(attrs []slog.Attr) []any {
-	if len(attrs) == 0 {
-		return nil
-	}
-	fields, index := make([]any, len(attrs)+len(h.groups)), len(h.groups)
-	for _, v := range attrs {
-		if isEmptyGroup(v) {
-			continue
-		}
-		field := attr2Field(v)
-		if field.Equals(glog.Skip()) {
-			continue
-		}
-		fields[index] = field
-		index++
-	}
-
-	if index == len(h.groups) {
-		return nil
-	}
-
-	for i, v := range h.groups {
-		fields[i] = glog.Namespace(v)
-	}
-	return fields[:index]
-}
-
 func (h *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	fields := h.toFields(attrs)
-	if len(fields) == 0 {
+	if len(attrs) == 0 {
 		return h
 	}
 
+	fields := make([]any, 0, len(attrs))
+	for _, attr := range attrs {
+		fields = append(fields, attr2Field(attr))
+	}
 	cloned := h.clone()
 	cloned.l = cloned.l.With(fields...)
-	cloned.groups = nil
 	return cloned
 }
 
 func (h *Handler) WithGroup(name string) slog.Handler {
+	if name == "" {
+		return h
+	}
 	cloned := h.clone()
-	cloned.groups = append(cloned.groups, name)
+	cloned.l = cloned.l.With(glog.Namespace(name))
 	return cloned
 }
 
 func (h *Handler) clone() *Handler {
 	cloned := *h
-	cloned.groups = slices.Clip(h.groups)
 	return &cloned
 }
 
@@ -138,6 +104,9 @@ func attr2Field(attr slog.Attr) glog.Field {
 	case slog.KindUint64:
 		return zap.Uint64(attr.Key, attr.Value.Uint64())
 	case slog.KindGroup:
+		if len(attr.Value.Group()) == 0 {
+			return zap.Skip()
+		}
 		val := group(attr.Value.Group())
 		if attr.Key == "" {
 			return zap.Inline(val)

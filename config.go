@@ -12,7 +12,7 @@ type SamplingConfig = zap.SamplingConfig
 
 type Config struct {
 	Name          string            `json:"name" yaml:"name"`
-	Level         Level             `json:"level" yaml:"level"`
+	Level         LevelEnabler      `json:"level" yaml:"level"`
 	LazyDisabled  bool              `json:"lazyDisabled" yaml:"lazyDisabled"`
 	AddCaller     bool              `json:"addCaller" yaml:"addCaller"`
 	StackLevel    *Level            `json:"stackLevel" yaml:"stackLevel"`

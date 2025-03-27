@@ -69,8 +69,7 @@ func TestHandler_WithGroup(t *testing.T) {
 	logger, _ := glog.NewDefault()
 	handler := NewHandler(logger)
 
-	groupName := "testGroup"
-	newHandler := handler.WithGroup(groupName)
+	newHandler := handler.WithGroup("group")
 	if newHandler == handler {
 		t.Errorf("WithGroup() did not return a new handler")
 	}
@@ -103,6 +102,7 @@ func TestAttr2Field(t *testing.T) {
 	}{
 		{slog.Attr{Key: "key", Value: slog.StringValue("value")}, zap.String("key", "value")},
 		{slog.Attr{Key: "key", Value: slog.IntValue(1)}, zap.Int64("key", 1)},
+		{slog.Attr{Key: "key", Value: slog.GroupValue()}, zap.Skip()},
 	}
 
 	for _, tt := range tests {

@@ -26,9 +26,12 @@ func ExampleHandler() {
 	slog.WarnContext(ctx, "Logging is enabled for level: warn")
 	slog.ErrorContext(ctx, "Logging is enabled for level: error")
 
+	slog.Default().WithGroup("group").ErrorContext(ctx, "Logging is enabled for level: error")
+
 	// Example Output:
-	// {"level":"debug","ts":"2024-10-01T13:15:31.872349024Z","caller":"slog/example_test.go:24","msg":"Logging is enabled for level: debug","req_id":"123","user_id":"456"}
-	// {"level":"info","ts":"2024-10-01T13:15:31.872422976Z","caller":"slog/example_test.go:25","msg":"Logging is enabled for level: info","req_id":"123","user_id":"456"}
-	// {"level":"warn","ts":"2024-10-01T13:15:31.872431512Z","caller":"slog/example_test.go:26","msg":"Logging is enabled for level: warn","req_id":"123","user_id":"456"}
-	// {"level":"error","ts":"2024-10-01T13:15:31.872436361Z","caller":"slog/example_test.go:27","msg":"Logging is enabled for level: error","req_id":"123","user_id":"456","stacktrace":"github.com/ace-zhaoy/glog/slog_test.ExampleHandler\n\t/go/src/github.com/ace-zhaoy/glog/slog/example_test.go:27\ntesting.runExample\n\t/usr/local/go/src/testing/run_example.go:63\ntesting.runExamples\n\t/usr/local/go/src/testing/example.go:44\ntesting.(*M).Run\n\t/usr/local/go/src/testing/testing.go:1927\nmain.main\n\t_testmain.go:61\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:267"}
+	// {"level":"debug","ts":"2025-03-27T03:57:17.609658457Z","caller":"slog/example_test.go:24","msg":"Logging is enabled for level: debug","req_id":"123","user_id":"456"}
+	// {"level":"info","ts":"2025-03-27T03:57:17.609745417Z","caller":"slog/example_test.go:25","msg":"Logging is enabled for level: info","req_id":"123","user_id":"456"}
+	// {"level":"warn","ts":"2025-03-27T03:57:17.609761419Z","caller":"slog/example_test.go:26","msg":"Logging is enabled for level: warn","req_id":"123","user_id":"456"}
+	// {"level":"error","ts":"2025-03-27T03:57:17.609769842Z","caller":"slog/example_test.go:27","msg":"Logging is enabled for level: error","req_id":"123","user_id":"456","stacktrace":"github.com/ace-zhaoy/glog/slog_test.ExampleHandler\n\t/go/src/github.com/ace-zhaoy/glog/slog/example_test.go:27\ntesting.runExample\n\t/usr/local/go/src/testing/run_example.go:63\ntesting.runExamples\n\t/usr/local/go/src/testing/example.go:44\ntesting.(*M).Run\n\t/usr/local/go/src/testing/testing.go:1927\nmain.main\n\t_testmain.go:61\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:267"}
+	// {"level":"error","ts":"2025-03-27T03:57:17.609802643Z","caller":"slog/example_test.go:29","msg":"Logging is enabled for level: error","group":{"req_id":"123","user_id":"456"},"stacktrace":"github.com/ace-zhaoy/glog/slog_test.ExampleHandler\n\t/go/src/github.com/ace-zhaoy/glog/slog/example_test.go:29\ntesting.runExample\n\t/usr/local/go/src/testing/run_example.go:63\ntesting.runExamples\n\t/usr/local/go/src/testing/example.go:44\ntesting.(*M).Run\n\t/usr/local/go/src/testing/testing.go:1927\nmain.main\n\t_testmain.go:61\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:267"}
 }
