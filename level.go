@@ -17,3 +17,9 @@ const (
 type LevelEnabler = zapcore.LevelEnabler
 
 type LevelEnablerFunc = zap.LevelEnablerFunc
+
+type AtomicLevel = zap.AtomicLevel
+
+func ParseLevel(text string) (Level, error) {
+	return zapcore.ParseLevel(text)
+}
