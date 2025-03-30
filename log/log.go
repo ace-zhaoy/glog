@@ -25,6 +25,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	l.WithFormatEnable()
 	SetLogger(l)
 }
 

@@ -36,6 +36,26 @@ func main() {
 // {"level":"info","ts":"2024-10-01T21:44:08.2737888+08:00","caller":"glog/main.go:9","msg":"This is an info message with context"}
 ```
 
+```go
+package main
+
+import (
+	"github.com/ace-zhaoy/glog/log"
+)
+
+func main() {
+	log.Info("This is an info message")
+	// msg: "This is an info message"
+	log.Info("This is an info message", "key1", "value1", "key2", "value2")
+	// msg: "This is an info message", key1: "value1", key2: "value2"
+	log.Info("This is an info message. params: %d %s", 123, "value2")
+	// msg: "This is an info message. params: 123 value2"
+	log.Info("This is an info message.", log.String("key1", "value1"))
+	// msg: "This is an info message.", key1: "value1"
+}
+
+```
+
 #### Set Default Logger
 ```go
 package main
