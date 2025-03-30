@@ -200,6 +200,31 @@ func (l *Logger) log(ctx context.Context, lvl Level, msg string, args ...any) {
 	ce.Write(record.Fields()...)
 }
 
+func (l *Logger) logFields(ctx context.Context, lvl Level, msg string, fields ...Field) {
+	if !l.core.Enabled(lvl) {
+		return
+	}
+
+	ce := l.check(lvl, msg)
+	if ce == nil {
+		return
+	}
+
+	record := NewRecordWithCapacity(len(l.contextHandlers) + len(fields))
+	if ctx != nil && len(l.contextHandlers) > 0 {
+		for _, handler := range l.contextHandlers {
+			handler(ctx, record)
+		}
+	}
+	record.AddFields(fields...)
+
+	ce.Write(record.Fields()...)
+}
+
+func (l *Logger) LogFields(ctx context.Context, lvl Level, msg string, fields ...Field) {
+	l.logFields(ctx, lvl, msg, fields...)
+}
+
 func (l *Logger) LogContext(ctx context.Context, lvl Level, msg string, args ...any) {
 	l.log(ctx, lvl, msg, args...)
 }

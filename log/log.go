@@ -79,3 +79,7 @@ func ErrorContext(ctx context.Context, msg string, args ...any) {
 func Sync() error {
 	return Logger().Sync()
 }
+
+func LogFields(ctx context.Context, lvl glog.Level, msg string, fields ...glog.Field) {
+	Logger().LogFields(ctx, lvl, msg, fields...)
+}

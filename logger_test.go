@@ -380,3 +380,47 @@ func TestLogger_log(t *testing.T) {
 		assert.True(t, core.entries[0].Caller.Defined, "Expected caller information to be added")
 	})
 }
+
+func TestLogger_logFields(t *testing.T) {
+	core := &mockCore{}
+	logger := NewLogger(core, WithContextHandlers(BuildContextHandler("key")))
+
+	t.Run("logFields without context", func(t *testing.T) {
+		core.reset()
+		core.enabled = true
+		logger.logFields(nil, LevelInfo, "test message", String("key", "value"))
+		assert.Len(t, core.entries, 1, "Expected one log entry")
+		assert.Equal(t, "test message", core.entries[0].Message, "Expected message to be 'test message'")
+		assert.Contains(t, core.fields, String("key", "value"), "Expected fields to contain 'key: value'")
+	})
+
+	t.Run("logFields with context", func(t *testing.T) {
+		core.reset()
+		core.enabled = true
+		ctx := context.WithValue(context.Background(), "key", "value")
+		logger.logFields(ctx, LevelInfo, "test message", String("key", "value"))
+		assert.Len(t, core.entries, 1, "Expected one log entry")
+		assert.Equal(t, "test message", core.entries[0].Message, "Expected message to be 'test message'")
+		assert.Contains(t, core.fields, String("key", "value"), "Expected fields to contain 'key: value'")
+	})
+
+	t.Run("logFields with stack trace", func(t *testing.T) {
+		core.reset()
+		core.enabled = true
+		logger.stackLevel = LevelEnablerFunc(func(lvl Level) bool {
+			return lvl == LevelInfo
+		})
+		logger.logFields(nil, LevelInfo, "test message", String("key", "value"))
+		assert.Len(t, core.entries, 1, "Expected one log entry")
+		assert.NotEmpty(t, core.entries[0].Stack, "Expected stack trace to be added")
+	})
+
+	t.Run("logFields with caller information", func(t *testing.T) {
+		core.reset()
+		core.enabled = true
+		logger.addCaller = true
+		logger.logFields(nil, LevelInfo, "test message", String("key", "value"))
+		assert.Len(t, core.entries, 1, "Expected one log entry")
+		assert.True(t, core.entries[0].Caller.Defined, "Expected caller information to be added")
+	})
+}
