@@ -32,13 +32,13 @@ func (h *Handler) Handle(ctx context.Context, record slog.Record) error {
 		return nil
 	}
 
-	fields := make([]any, 0, record.NumAttrs())
+	gr := glog.NewRecordWithCapacity(record.NumAttrs())
 	record.Attrs(func(attr slog.Attr) bool {
-		fields = append(fields, attr2Field(attr))
+		gr.AddFields(attr2Field(attr))
 		return true
 	})
 
-	h.l.LogContext(ctx, lvl, record.Message, fields...)
+	h.l.LogFields(ctx, lvl, record.Message, gr.Fields()...)
 	return nil
 }
 
