@@ -270,10 +270,10 @@ func (l *Logger) Sync() error {
 }
 
 func countPercent(s string) int {
-	count := 0
-	for i := 0; i < len(s); i++ {
+	count, length := 0, len(s)
+	for i := 0; i < length; i++ {
 		if s[i] == '%' {
-			if i+1 < len(s) && s[i+1] == '%' {
+			if i+1 < length && s[i+1] == '%' {
 				i++
 			} else {
 				count++
